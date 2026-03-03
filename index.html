@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="utf-8">
+    <title>360°バーチャルツアー</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="pannellum.css"/>
+    <style>
+        /* 画面全体をVRにする */
+        html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; }
+        #pano-viewer { width: 100%; height: 100%; background-color: #000; }
+
+        /* 左上のマップ設定 */
+        #map-container {
+            position: absolute; top: 20px; left: 20px;
+            width: 250px; border: 2px solid white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5); z-index: 100;
+            background: rgba(0,0,0,0.2);
+        }
+        #floor-map-wrapper { position: relative; width: 100%; }
+        #floor-map { width: 100%; display: block; }
+
+        /* マップ上の赤い点 */
+        .hotspot {
+            position: absolute; width: 18px; height: 18px;
+            background-color: #ff0000; border-radius: 50%;
+            cursor: pointer; border: 2px solid #fff;
+            transform: translate(-50%, -50%); z-index: 110;
+        }
+        .hotspot:hover { background-color: #ffcc00; transform: translate(-50%, -50%) scale(1.2); }
+
+        /* 4箇所の座標（ここで位置を微調整してください） */
+        #pin-1 { top: 20%; left: 20%; }
+        #pin-2 { top: 20%; left: 80%; }
+        #pin-3 { top: 80%; left: 20%; }
+        #pin-4 { top: 80%; left: 80%; }
+    </style>
+</head>
+<body>
+
+    <div id="pano-viewer"></div>
+
+    <div id="map-container">
+        <div id="floor-map-wrapper">
+            <img id="floor-map" src="floor_map.png">
+            <div class="hotspot" id="pin-1" data-pano="photo1.jpg" title="地点1"></div>
+            <div class="hotspot" id="pin-2" data-pano="photo2.jpg" title="地点2"></div>
+            <div class="hotspot" id="pin-3" data-pano="photo3.jpg" title="地点3"></div>
+            <div class="hotspot" id="pin-4" data-pano="photo4.jpg" title="地点4"></div>
+        </div>
+    </div>
+
+    <script src="pannellum.js"></script>
+    <script>
+        let viewer = null;
+        function loadPano(img) {
+            if (viewer) viewer.destroy();
+            viewer = pannellum.viewer('pano-viewer', {
+                "type": "equirectangular",
+                "panorama": img,
+                "autoLoad": true,
+                "compass": true
+            });
+        }
+        // 最初に表示する写真
+        loadPano('photo1.jpg');
+
+        // クリックイベントの設定
+        document.querySelectorAll('.hotspot').forEach(el => {
+            el.addEventListener('click', function() {
+                loadPano(this.dataset.pano);
+            });
+        });
+    </script>
+</body>
+</html>
