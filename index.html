@@ -6,41 +6,63 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="pannellum.css"/>
     <style>
-        /* 画面全体をVRにする */
         html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; }
         #pano-viewer { width: 100%; height: 100%; background-color: #000; }
 
-        /* 左上のマップ設定 */
+        /* マップの外枠 */
         #map-container {
-            position: absolute; top: 20px; left: 20px;
+            position: absolute; top: 15px; left: 15px;
             width: 250px; border: 2px solid white;
             box-shadow: 0 0 10px rgba(0,0,0,0.5); z-index: 100;
-            background: rgba(0,0,0,0.2);
+            background: rgba(0,0,0,0.5);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            overflow: hidden;
+            border-radius: 8px;
         }
+
+        /* 小さくなった時のスタイル（スマホ用） */
+        #map-container.minimized {
+            width: 80px; height: 40px;
+            background: rgba(255, 0, 0, 0.8);
+        }
+        
+        /* ボタン文字の設定 */
+        #map-container::before {
+            content: "MAP"; color: white; font-weight: bold;
+            display: none; text-align: center; line-height: 40px; width: 100%;
+        }
+        #map-container.minimized::before { display: block; }
+        #map-container.minimized #floor-map-wrapper { display: none; }
+
         #floor-map-wrapper { position: relative; width: 100%; }
         #floor-map { width: 100%; display: block; }
 
-        /* マップ上の赤い点 */
+        /* 赤いピンの共通スタイル */
         .hotspot {
-            position: absolute; width: 18px; height: 18px;
+            position: absolute; width: 20px; height: 20px;
             background-color: #ff0000; border-radius: 50%;
             cursor: pointer; border: 2px solid #fff;
             transform: translate(-50%, -50%); z-index: 110;
         }
-        .hotspot:hover { background-color: #ffcc00; transform: translate(-50%, -50%) scale(1.2); }
 
-        /* 4箇所の座標（ここで位置を微調整してください） */
+        /* ご指定の4箇所の座標 */
         #pin-1 { top: 67%; left: 20%; }
         #pin-2 { top: 80%; left: 34%; }
         #pin-3 { top: 66%; left: 71%; }
         #pin-4 { top: 81%; left: 86%; }
+
+        /* スマホ向けの幅微調整 */
+        @media screen and (max-width: 480px) {
+            #map-container { width: 200px; }
+        }
     </style>
 </head>
 <body>
 
     <div id="pano-viewer"></div>
 
-    <div id="map-container">
+    <div id="map-container" onclick="toggleMap(event)">
         <div id="floor-map-wrapper">
             <img id="floor-map" src="floor_map.png">
             <div class="hotspot" id="pin-1" data-pano="photo1.jpg" title="地点1"></div>
@@ -59,18 +81,26 @@
                 "type": "equirectangular",
                 "panorama": img,
                 "autoLoad": true,
+                "showControls": true,
                 "compass": true
             });
         }
-        // 最初に表示する写真
+        
+        // 最初の写真を表示
         loadPano('photo1.jpg');
 
-        // クリックイベントの設定
+        // ピンをクリックした時の処理
         document.querySelectorAll('.hotspot').forEach(el => {
-            el.addEventListener('click', function() {
+            el.addEventListener('click', function(e) {
+                e.stopPropagation(); // マップを閉じないようにする
                 loadPano(this.dataset.pano);
             });
         });
+
+        // マップの開閉切り替え
+        function toggleMap(e) {
+            document.getElementById('map-container').classList.toggle('minimized');
+        }
     </script>
 </body>
 </html>
